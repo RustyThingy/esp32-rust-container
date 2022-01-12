@@ -10,3 +10,9 @@ WORKDIR /opt
 
 COPY install-rust-toolchain.sh .
 RUN ./install-rust-toolchain.sh
+
+RUN rustup default esp
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get -y update && apt-get install -y pkg-config && apt-get install -y libudev-dev
+RUN cargo install espflash
+
