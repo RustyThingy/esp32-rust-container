@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONTAINER="kdvkrs/zephyr-container-rust:latest"
+CONTAINER="kdvkrs/esp32-rust-container:latest"
 
 # check if podman or docker is installed
 if [ -x "$(command -v podman)" ]; then

@@ -2,7 +2,7 @@
 
 usage() { echo "Usage: $0 -p <project directory>" 1>&2; exit 1; }
 
-CONTAINER="esp32-container-rust:latest"
+CONTAINER="kdvkrs/esp32-rust-container:latest"
 
 LNCMD="ln -s /opt/esp/idf/components/bt/host/nimble/nimble/nimble/host/services/gap/include/services /project/.embuild/platformio/packages/framework-espidf/components/bt/include/esp32/include"
 

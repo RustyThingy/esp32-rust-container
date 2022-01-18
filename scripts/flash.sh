@@ -2,14 +2,17 @@
 
 usage() { echo "Usage: $0 -p <project directory>" 1>&2; exit 1; }
 
-CONTAINER="esp32-container-rust:latest"
+CONTAINER="kdvkrs/esp32-rust-container:latest"
 
 LNCMD="ln -s /opt/esp/idf/components/bt/host/nimble/nimble/nimble/host/services/gap/include/services /project/.embuild/platformio/packages/framework-espidf/components/bt/include/esp32/include"
 
-while getopts "d:p:" o; do
+while getopts "d:p:r" o; do
     case "${o}" in
 		p)
 			p=${OPTARG}
+			;;
+		r)
+			r="--release"
 			;;
 		d)
 			d=${OPTARG}
@@ -43,4 +46,4 @@ fi
 
 $CMD run --rm -it --name esp32-build-container --device ${d} -v /run/udev:/run/udev:ro \
 	 --network host --privileged -v ${p}:/project --workdir /project \
-     $CONTAINER bash -lc "cargo espflash $d" 
+     $CONTAINER bash -lc "cargo espflash $d --speed 460800 $r" 

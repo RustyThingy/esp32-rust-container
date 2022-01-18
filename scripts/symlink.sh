@@ -36,4 +36,4 @@ fi
 
 $CMD run --rm -it --name esp32-build-container -v /run/udev:/run/udev:ro \
 	 --network host --privileged -v ${p}:/project --workdir /project \
-     $CONTAINER bash -lc "cargo build" 
+     	 $CONTAINER $LNCMD

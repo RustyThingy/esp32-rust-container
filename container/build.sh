@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker build -t esp32-container-rust .
+docker build -t kdvkrs/esp32-rust-container . 

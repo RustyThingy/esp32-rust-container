@@ -1,167 +1,27 @@
-# rust-build
+# esp32-rust-container
 
-This repository contains:
-- workflows for building Rust fork [esp-rs/rust](https://github.com/esp-rs/rust) with Xtensa support
-- binary artifacts in [Releases](https://github.com/esp-rs/rust-build/releases)
+This repository is a fork of [esp-rs/rust-build](https://github.com/esp-rs/rust-build) with additional support
+of the [`espflash`](https://github.com/esp-rs/espflash) and [`espmonitor`](https://github.com/esp-rs/espmonitor) utilities.
 
-## Quick start
+The prebuilt container is available [at Dokerhub](https://hub.docker.com/r/kdvkrs/esp32-rust-container).
 
-The installation process of ready to use custom build of Rust and LLVM:
+## Building the container
 
-* [macOS Big Sur M1, macOS Big Sur x86_64, Linux x86_64](#rust-on-xtensa-installation-for-macos-and-linux)
-* [Windows 10, 11 x64](#rust-on-xtensa-installation-for-windows-x64)
-* [Podman/Docker](#rust-with-podman-or-docker)
-* Not supported: Linux arm64 - missing support in ESP-IDF - https://github.com/espressif/esp-idf/issues/6475
+The `container` directory contains a build script `build.sh` that is used to build the container. Alternatively, the container can be built 
+with tag `TAG` using
 
-## Installation
-
-### Rust on Xtensa Installation for macOS and Linux
-
-Following instructions are specific for ESP32 and ESP32-S series based on Xtensa architecture.
-
-Instructions for ESP-C series based on RISC-V architecture are described in document for [ESP32-C3](#esp32-c3).
-
-Tested OS: macOS Big Sur M1, macOS Big Sur x86_64, Linux x86_64
-
-#### Prerequisites
-
-- rustup - https://rustup.rs/
-
-#### Installation commands
-
-```sh
-./install-rust-toolchain.sh
+```bash
+$ docker build -t TAG container
 ```
 
-Export variables displayed at the end of the script.
+## Utility scripts
 
-Installation of different version of toolchain:
+The `scripts` folder contains several utility scripts for building, flashing and monitoring the Docker container. 
 
-```
-./install-rust-toolchain.sh --toolchain-version 1.57.0.0 --export-file export-esp-rust.sh
-source ./export-esp-rust.sh
-```
-
-#### Get source code of examples
-
-```
-curl -LO "https://github.com/espressif/rust-esp32-example/archive/refs/heads/main.zip"
-unzip main.zip
-cd rust-esp32-example-main
-```
-
-#### Select architecture for the build
-
-For the ESP32 - default (Xtensa architecture):
-
-```sh
-idf.py set-target esp32
-```
-
-For the ESP32-S2 (Xtensa architecture):
-
-```sh
-idf.py set-target esp32s2
-```
-
-For the ESP32-S3 (Xtensa architecture):
-
-```sh
-idf.py set-target esp32s3
-```
-
-#### Build and flash
-
-```sh
-idf.py build flash
-```
-
-### Rust on Xtensa Installation for Windows x64
-
-Following instructions are specific for ESP32 and ESP32-S series based on Xtensa architecture.
-
-Instructions for ESP-C series based on RISC-V architecture are described in document for [ESP32-C3](esp32-c3).
-
-Tested OS: Windows 10 x64
-
-#### Prerequisites
-
-- Visual Studio - installed with option Desktop development with C++ - components: MSVCv142 - VS2019 C++ x86/64 build tools, Windows 10 SDK
-
-![Visual Studio Installer - configuration](support/img/rust-windows-requirements.png?raw=true)
-#### Installation commands for PowerShell
-
-```sh
-./Install-RustToolchain.ps1
-```
-
-Export variables displayed at the end of the output from the script.
-
-Installation of different version of toolchain:
-
-```
-./Install-RustToolchain.sh --toolchain-version 1.57.0.0 --export-file Export-EspRust.ps1
-source ./Export-EspRust.ps1
-```
-
-#### Get source code of examples
-
-```sh
-Invoke-WebRequest https://github.com/espressif/rust-esp32-example/archive/refs/heads/main.zip -OutFile rust-esp32-example.zip
-Expand-Archive rust-esp32-example.zip
-cd rust-esp32-example-main
-```
-
-#### Select architecture for the build
-
-For the ESP32 - default (Xtensa architecture):
-
-```sh
-idf.py set-target esp32
-```
-
-For the ESP32-S2 (Xtensa architecture):
-
-```sh
-idf.py set-target esp32s2
-```
-
-For the ESP32-S3 (Xtensa architecture):
-
-```sh
-idf.py set-target esp32s3
-```
-
-#### Build and flash
-
-```sh
-idf.py build flash
-```
-
-### ESP32-C3
-
-Install the RISCV target for Rust:
-
-```sh
-rustup target add riscv32i-unknown-none-elf
-```
-
-### Rust with Podman or Docker
-
-Alternatively you might build the project in the container where image already contains pre-installed Rust and ESP-IDF.
-
-Podman example with mapping multiple /dev/ttyUSB from host computer to the container:
-
-```
-podman run --device /dev/ttyUSB0 --device /dev/ttyUSB1 -it espressif/idf-rust-examples
-```
-
-Docker (does not support flashing from container):
-
-```
-docker run -it espressif/idf-rust-examples
-```
-
-Then follow instructions displayed on the screen.
-
-
+- `build_project.sh` Executes `cargo build` in the directory given via the `-p` argument.
+- `flash_monitor.sh` Executes `cargo espflash --monitor` in the directory given via the `-p` argument, building and flashing the project to the device given via the `-d` argument (not required, per default is `/dev/ttyUSB0`) and monitoring the serial output. The project can also be build in release mode using the `-r` flag.
+- `flash_monitor.sh` Executes `cargo espflash` in the directory given via the `-p` argument, building and flashing the project to the device given via the `-d` argument (not required, per default is `/dev/ttyUSB0`). The project can also be build in release mode using the `-r` flag.
+- `symlink.sh` Creates a symlink to the esp-idf header files in the `.embuild` directory of the project given with the `-p` argument. This may be required if esp-idf projects do not compile correctly.
+- `open_shell.sh` Opens a `bash` shell in the docker container 
+- `open_shell.sh` Monitors the device given with the `-d` argument with the `espmonitor` tool.
+- `setup.sh` Downloads the prebuilt container if it is not present locally and installs the relevant udev rules for device usage, may be required for the container to work properly.
